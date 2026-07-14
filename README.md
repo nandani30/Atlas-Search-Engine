@@ -1,71 +1,61 @@
-# Atlas Search Engine
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Atom_icon_black.svg" width="80" alt="Atlas Logo"/>
+  <h1>Atlas Search Engine</h1>
+  <p><strong>Everything worth knowing, in one search.</strong></p>
+  <a href="https://atlas-search-engine-lime.vercel.app/"><strong>🔗 Visit Live Demo (Vercel)</strong></a>
+</div>
 
-Atlas is a full-stack search engine with a Spring Boot backend and React/Vite frontend. It includes web crawlers for Wikipedia, BBC News, and Movies, as well as a BM25 ranking algorithm and a Levenshtein-distance based autocomplete trie.
+<br />
 
-## Prerequisites
+Atlas is a high-performance, full-stack search engine engineered from scratch. It features custom web crawlers, a global BM25 ranking algorithm, and real-time autocomplete—all built without relying on external search services like Elasticsearch or Algolia.
 
-- Java 17
-- Maven
-- Node.js (for frontend)
+## 🚀 Key Features
 
-## Project Structure
+* **Custom Web Crawlers**: Autonomous background Java agents that intelligently crawl and scrape data from world-renowned sources (BBC, Reuters, NASA, CERN, Wikipedia, etc.).
+* **Content Freshness Extraction**: Uses Jsoup to parse hidden HTML `<meta>` and `<time>` tags, determining the true real-world publication date of articles to surface the freshest news.
+* **Global BM25 Ranking Algorithm**: Custom-built search relevance algorithm featuring Term Frequency Saturation (TF) and Global Inverse Document Frequency (IDF) scoring across distributed collections.
+* **Trie-Based Autocomplete**: Instant search suggestions powered by an optimized Trie data structure.
+* **Levenshtein Spell Correction**: Intelligent "Did you mean?" functionality for fuzzy matching and typo tolerance.
+* **Single-Writer Database Queue**: Engineered a custom asynchronous queueing system to handle high-concurrency DB writes for SQLite (Turso) without locking exceptions.
 
-- `/backend`: Spring Boot application.
-- `/frontend`: React + Vite application.
-- `/data`: Directory where crawled and fallback JSON data is stored.
+## 🛠 Tech Stack
 
-## Running Locally
+* **Frontend**: React, Vite, Vanilla CSS
+* **Backend**: Java 17, Spring Boot, Jsoup
+* **Database**: Turso (Distributed SQLite)
+* **Hosting**: Vercel (Frontend), Render (Backend Engine)
 
-### Database Setup (Turso/libSQL)
+## 🧠 System Architecture
 
-Atlas uses Turso (libSQL) instead of PostgreSQL. Turso is a distributed, SQLite-compatible database.
-Because SQLite does not fully support highly concurrent writers without throwing "database is locked" exceptions, Atlas implements a **Single-Writer Queue**. The crawlers enqueue their parsed pages into this in-memory queue, and a dedicated `DocumentWriterService` thread processes the writes sequentially.
+1. **Crawler Layer**: Runs scheduled tasks (`@Scheduled`) to scrape configured seed URLs. Extracts title, text, and publication metadata using `Jsoup`.
+2. **Database Layer**: A single-threaded `DocumentWriterService` consumes from a blocking queue, safely persisting crawled pages into the Turso database to avoid SQLite concurrency locks.
+3. **Indexing Layer**: Upon startup, the `IndexerService` loads documents into a highly optimized In-Memory Inverted Index and computes global corpus statistics.
+4. **Search Layer**: Queries are tokenized, cleaned, and scored using a finely tuned BM25 formula that boosts title matches by 15x.
 
-1. **Local Dev**: Use the Turso CLI:
-   ```bash
-   turso dev
-   ```
-   Set your `backend/.env` to point to the local URL (usually `http://127.0.0.1:8080`).
+## 💻 Running Locally
 
-2. **Cloud Dev**: Create a `.env` file in `backend/`:
-   ```env
-   TURSO_DATABASE_URL=https://<your-turso-db>.turso.io
-   TURSO_AUTH_TOKEN=<your-token>
-   ```
+### 1. Database Setup
+Atlas uses Turso (libSQL). You can run it locally using the CLI:
+```bash
+turso dev
+```
+Create a `backend/.env` file:
+```env
+TURSO_DATABASE_URL=http://127.0.0.1:8080
+# Or use your remote Turso URL and Token
+```
 
-### Backend
+### 2. Backend
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+*The Spring Boot server will start on port 8080 and immediately trigger the web crawlers in the background.*
 
-1. **Start the server**:
-   ```bash
-   cd backend
-   ./mvnw spring-boot:run
-   ```
-   The backend runs on `http://localhost:8080`.
-   On startup, the crawler jobs are scheduled to run every 1 hour automatically, seeding the Turso DB.
-
-### Frontend
-
-1. **Install and Run**:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-   The frontend runs on `http://localhost:5173` (by default with Vite).
-
-## Deployment
-
-### Backend (e.g. Render / Railway)
-1. Use the provided `Dockerfile` in the `backend/` directory.
-2. The `Dockerfile` exposes port `8080`.
-3. Set any necessary environment variables (e.g. `PORT=8080`).
-4. Keep in mind that since the index is built in memory, the server needs enough RAM to hold the index, and file storage for the crawler output is ephemeral on some cloud platforms unless a persistent volume is mounted at `/app/data`.
-
-### Frontend (e.g. Vercel / Netlify)
-1. In your frontend hosting platform, set the build command to `npm run build` and output directory to `dist`.
-2. Add an environment variable in your frontend `.env` (or directly in the code `API_BASE`) pointing to your deployed backend URL.
-
-## Architecture Highlights
-- **BM25 Ranker**: Custom implementation of BM25 term frequency saturation and document length normalization.
-- **Autocomplete Trie**: Fast prefix search and Levenshtein distance "did you mean" spelling correction.
-- **Crawlers**: Standalone Jsoup web crawlers with BFS traversal, delay logic, and visited sets.
+### 3. Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*The Vite development server will start on port 5173.*
