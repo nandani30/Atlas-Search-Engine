@@ -75,25 +75,35 @@ public class IndexerService {
         
         String cleanTitle = doc.getTitle().toLowerCase().replaceAll("[^a-z0-9\\s]", "").trim();
         data.trie().insert(cleanTitle);
+        
+        // At the very end, truncate the text payload permanently to save RAM on the 512MB Render free tier
+        String originalText = doc.getText();
+        if (originalText != null && originalText.length() > 500) {
+            doc.setText(originalText.substring(0, 500) + "...");
+        }
     }
 
-    public void rebuildCollection(String collection, List<Document> newDocs) {
+    public void rebuildCollectionFromDB(String collection, com.atlas.searchengine.model.DocumentRepository repo) {
         System.out.println("Starting background rebuild for collection: " + collection);
         CollectionIndexData newData = new CollectionIndexData(
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        for (Document doc : newDocs) {
-            indexDocIntoData(doc, newData);
-        }
+        int page = 0;
+        org.springframework.data.domain.Page<Document> docPage;
+        do {
+            docPage = repo.findByCollection(collection, org.springframework.data.domain.PageRequest.of(page, 50));
+            for (Document doc : docPage.getContent()) {
+                indexDocIntoData(doc, newData);
+            }
+            page++;
+        } while (docPage.hasNext());
 
         // Atomic swap
         collections.put(collection, newData);
         System.out.println("Finished rebuild for collection: " + collection);
 
         // Invalidate cache
-        // Note: Spring Cache doesn't easily support partial key eviction out-of-the-box.
-        // We evict all entries in "searchResults" to ensure no stale data remains for this collection.
         var cache = cacheManager.getCache("searchResults");
         if (cache != null) {
             cache.clear();

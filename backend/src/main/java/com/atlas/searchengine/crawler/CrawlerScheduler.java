@@ -28,17 +28,17 @@ public class CrawlerScheduler {
 
         Thread t1 = new Thread(() -> {
             learningCrawler.crawlBatch(50);
-            indexerService.rebuildCollection("learning", documentRepository.findByCollection("learning"));
+            indexerService.rebuildCollectionFromDB("learning", documentRepository);
         });
 
         Thread t2 = new Thread(() -> {
             newsCrawler.crawlBatch(50);
-            indexerService.rebuildCollection("news", documentRepository.findByCollection("news"));
+            indexerService.rebuildCollectionFromDB("news", documentRepository);
         });
 
         Thread t3 = new Thread(() -> {
             scienceCrawler.crawlBatch(50);
-            indexerService.rebuildCollection("science", documentRepository.findByCollection("science"));
+            indexerService.rebuildCollectionFromDB("science", documentRepository);
         });
 
         t1.start();

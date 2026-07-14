@@ -24,9 +24,7 @@ public class StartupIndexer implements ApplicationRunner {
         System.out.println("Indexing Documents from Database...");
         String[] collections = {"learning", "science", "news"};
         for (String col : collections) {
-            List<Document> docs = documentRepository.findByCollection(col);
-            indexerService.rebuildCollection(col, docs);
-            System.out.println("Indexed " + docs.size() + " documents for collection: " + col);
+            indexerService.rebuildCollectionFromDB(col, documentRepository);
         }
         System.out.println("Indexing Complete.");
     }

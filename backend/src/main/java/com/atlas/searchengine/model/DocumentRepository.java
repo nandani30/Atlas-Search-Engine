@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, String> {
     List<Document> findByCollection(String collection);
+    org.springframework.data.domain.Page<Document> findByCollection(String collection, org.springframework.data.domain.Pageable pageable);
 }
