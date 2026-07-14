@@ -58,7 +58,8 @@ public class IndexerService {
 
         Map<String, Integer> termFrequencies = new HashMap<>();
         for (String token : titleTokens) {
-            termFrequencies.put(token, termFrequencies.getOrDefault(token, 0) + 1);
+            // Give title words a massive 15x weight boost for better search relevance
+            termFrequencies.put(token, termFrequencies.getOrDefault(token, 0) + 15);
             data.trie().insert(token);
         }
         for (String token : textTokens) {
