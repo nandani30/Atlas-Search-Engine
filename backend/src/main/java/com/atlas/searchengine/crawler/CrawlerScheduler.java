@@ -21,8 +21,8 @@ public class CrawlerScheduler {
         this.documentRepository = documentRepository;
     }
 
-    // Run every 1 hour (3600000 ms)
-    @Scheduled(fixedDelay = 3600000)
+    // Run every 1 hour (3600000 ms), but wait 60 seconds after startup
+    @Scheduled(initialDelay = 60000, fixedDelay = 3600000)
     public void runCrawlers() {
         System.out.println("Starting scheduled re-crawling...");
 
