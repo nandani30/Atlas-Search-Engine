@@ -7,7 +7,7 @@
 
 <br />
 
-Atlas is a high-performance, full-stack search engine engineered from scratch. It features custom web crawlers, a global BM25 ranking algorithm, and real-time autocomplete—all built without relying on external search services like Elasticsearch or Algolia.
+Atlas is a high-performance, full-stack **niche search engine** engineered from scratch. Rather than attempting to index the entire web, Atlas specializes in curated, high-quality information streams—specifically targeted at **News, Science, and Learning**. It features custom web crawlers, a global BM25 ranking algorithm, and real-time autocomplete—all built without relying on external search services like Elasticsearch or Algolia.
 
 ## 🚀 Key Features
 
