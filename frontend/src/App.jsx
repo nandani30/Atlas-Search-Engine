@@ -144,7 +144,7 @@ function App() {
         onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}
         onMouseEnter={() => setSelectedIndex(idx)}
       >
-        <IconSearch size={14} className="autocomplete-item-icon" />
+        <IconSearch size={18} className="autocomplete-item-icon" />
         {content}
       </div>
     );
@@ -154,7 +154,7 @@ function App() {
     <div className="container">
       {!results && (
         <div className="landing-header">
-          <IconAtom size={36} className="logo-icon" style={{ marginBottom: '8px' }} />
+          <IconAtom size={54} className="logo-icon" style={{ marginBottom: '8px' }} />
           <span className="logo-text">Atlas</span>
           <span className="header-subtitle">Everything worth knowing, in one search.</span>
         </div>
@@ -162,7 +162,7 @@ function App() {
 
       {results && (
         <div className="results-header" onClick={() => {setResults(null); setQuery('');}}>
-          <IconAtom size={22} className="logo-icon" />
+          <IconAtom size={32} className="logo-icon" />
           <span className="logo-text">Atlas</span>
         </div>
       )}
@@ -180,7 +180,7 @@ function App() {
             onFocus={() => setShowAutocomplete(true)}
             onBlur={() => setShowAutocomplete(false)}
           />
-          <IconSearch size={16} className="search-icon" />
+          <IconSearch size={20} className="search-icon" />
         </div>
         
         {showAutocomplete && autocompleteSuggestions.length > 0 && (
@@ -202,21 +202,21 @@ function App() {
             className={`filter-pill ${collection === 'learning' ? 'active' : ''}`}
             onClick={() => { setCollection('learning'); setTimeout(() => handleSearch(query, 0), 0); }}
           >
-            <IconBooks size={14} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
+            <IconBooks size={18} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
             Learning
           </button>
           <button 
             className={`filter-pill ${collection === 'science' ? 'active' : ''}`}
             onClick={() => { setCollection('science'); setTimeout(() => handleSearch(query, 0), 0); }}
           >
-            <IconFlask size={14} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
+            <IconFlask size={18} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
             Science
           </button>
           <button 
             className={`filter-pill ${collection === 'news' ? 'active' : ''}`}
             onClick={() => { setCollection('news'); setTimeout(() => handleSearch(query, 0), 0); }}
           >
-            <IconNews size={14} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
+            <IconNews size={18} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
             News
           </button>
         </div>

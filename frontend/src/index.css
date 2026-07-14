@@ -80,22 +80,22 @@ body {
 }
 
 .landing-header .logo-text {
-  font-size: 24px;
+  font-size: 36px;
 }
 
 .results-header .logo-text {
-  font-size: 19px;
+  font-size: 24px;
 }
 
 .header-subtitle {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-secondary);
   margin-top: 4px;
 }
 
 .search-container {
   position: relative;
-  max-width: 480px;
+  max-width: 560px;
   margin: 0 auto 8px;
   width: 100%;
 }
@@ -111,7 +111,7 @@ body {
 
 .search-icon {
   position: absolute;
-  left: 10px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
@@ -119,12 +119,12 @@ body {
 
 .search-input {
   width: 100%;
-  padding: 10px 10px 10px 36px;
+  padding: 14px 14px 14px 44px;
   background: var(--search-bg);
   border: 1px solid var(--search-border);
   color: var(--search-text);
   border-radius: var(--radius);
-  font-size: 15px;
+  font-size: 18px;
   outline: none;
 }
 
@@ -144,11 +144,11 @@ body {
 }
 
 .autocomplete-item {
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 12px 16px;
+  font-size: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
 }
 
@@ -166,23 +166,23 @@ body {
 
 .collection-filters {
   display: flex;
-  gap: 8px;
-  margin-bottom: 1.5rem;
+  gap: 10px;
+  margin-bottom: 2rem;
   overflow-x: auto;
 }
 
 .filter-pill {
-  font-size: 13px;
-  padding: 0 12px;
-  height: 30px;
+  font-size: 15px;
+  padding: 0 16px;
+  height: 36px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text-color);
-  border-radius: 15px;
+  border-radius: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   white-space: nowrap;
 }
 
@@ -197,32 +197,32 @@ body {
 }
 
 .landing-section {
-  max-width: 480px;
-  margin: 2rem auto 0;
+  max-width: 560px;
+  margin: 3rem auto 0;
 }
 
 .landing-title {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-secondary);
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   text-align: center;
 }
 
 .landing-pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 10px;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .suggestion-pill {
-  font-size: 12px;
+  font-size: 15px;
   background: var(--surface-1);
   color: var(--text-color);
   border: none;
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 6px 14px;
+  border-radius: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -233,16 +233,16 @@ body {
 }
 
 .results-count {
-  margin-bottom: 8px;
-  font-size: 13px;
+  margin-bottom: 12px;
+  font-size: 15px;
   color: var(--text-secondary);
 }
 
 .results-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 1.5rem;
+  gap: 24px;
+  margin-bottom: 2.5rem;
 }
 
 .result-item {
@@ -253,8 +253,8 @@ body {
 .result-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 2px;
+  gap: 10px;
+  margin-bottom: 4px;
 }
 
 .result-title-link {
@@ -262,9 +262,9 @@ body {
 }
 
 .result-title {
-  font-size: 15px;
+  font-size: 20px;
   color: var(--text-accent);
-  margin: 2px 0;
+  margin: 4px 0;
   font-weight: 500;
 }
 
@@ -273,15 +273,15 @@ body {
 }
 
 .result-snippet {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .badge {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 13px;
+  padding: 3px 10px;
   border-radius: var(--radius);
 }
 
@@ -290,21 +290,21 @@ body {
 .badge-science { background: var(--bg-pro); color: var(--text-pro); }
 
 .result-url {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
 }
 
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  margin-bottom: 2.5rem;
 }
 
 .page-btn {
-  font-size: 13px;
-  padding: 0 12px;
-  height: 30px;
+  font-size: 15px;
+  padding: 0 16px;
+  height: 36px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text-color);
@@ -322,7 +322,7 @@ body {
 }
 
 .page-info {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
