@@ -8,5 +8,6 @@ public record DocumentWriteRequest(
         String text,
         String collection,
         String sourceUrl,
-        LocalDateTime crawledAt
+        LocalDateTime crawledAt,
+        LocalDateTime publishedAt
 ) {}

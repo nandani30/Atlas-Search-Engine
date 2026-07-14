@@ -25,16 +25,19 @@ public class Document {
 
     private LocalDateTime crawledAt;
 
+    private LocalDateTime publishedAt;
+
     public Document() {
     }
 
-    public Document(String id, String title, String text, String collection, String sourceUrl, LocalDateTime crawledAt) {
+    public Document(String id, String title, String text, String collection, String sourceUrl, LocalDateTime crawledAt, LocalDateTime publishedAt) {
         this.id = id;
         this.title = title;
         this.text = text;
         this.collection = collection;
         this.sourceUrl = sourceUrl;
         this.crawledAt = crawledAt;
+        this.publishedAt = publishedAt;
     }
 
     public String getId() {
@@ -83,5 +86,13 @@ public class Document {
 
     public void setCrawledAt(LocalDateTime crawledAt) {
         this.crawledAt = crawledAt;
+    }
+
+    public LocalDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(LocalDateTime publishedAt) {
+        this.publishedAt = publishedAt;
     }
 }

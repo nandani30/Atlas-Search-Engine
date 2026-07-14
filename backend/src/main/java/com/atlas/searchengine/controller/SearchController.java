@@ -71,6 +71,15 @@ public class SearchController {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("/latest")
+    public ResponseEntity<List<SearchResult>> latest(
+            @RequestParam(defaultValue = "all") String collection,
+            @RequestParam(defaultValue = "5") int limit) {
+        
+        List<SearchResult> latest = indexerService.getLatestPublishedDocuments(collection, limit);
+        return ResponseEntity.ok(latest);
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("ok");

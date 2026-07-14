@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { IconSearch, IconAtom, IconBooks, IconFlask, IconNews } from '@tabler/icons-react';
+import { IconSearch, IconAtom, IconBooks, IconFlask, IconNews, IconFlame } from '@tabler/icons-react';
 import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -12,6 +12,7 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   
   const [examples, setExamples] = useState([]);
+  const [latest, setLatest] = useState([]);
   const [results, setResults] = useState(null);
   const [didYouMean, setDidYouMean] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
@@ -30,6 +31,11 @@ function App() {
       fetch(`${API_BASE}/random-suggestions?collection=${collection}&count=5`)
         .then(res => res.json())
         .then(data => setExamples(data))
+        .catch(err => console.error(err));
+        
+      fetch(`${API_BASE}/latest?collection=${collection}&limit=5`)
+        .then(res => res.json())
+        .then(data => setLatest(data))
         .catch(err => console.error(err));
     }
   }, [collection, results]);
@@ -235,6 +241,22 @@ function App() {
                 </button>
               ))}
             </div>
+            
+            {latest.length > 0 && (
+              <>
+                <p className="landing-title" style={{ marginTop: '24px' }}>
+                  <IconFlame size={18} style={{ marginRight: '6px', verticalAlign: '-3px', color: '#ff6b6b' }} />
+                  Latest news & articles
+                </p>
+                <div className="landing-pills">
+                  {latest.map((ex, idx) => (
+                    <button key={`latest-${idx}`} className="suggestion-pill trending-pill" onClick={() => handleSearch(ex.title)}>
+                      {ex.title}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 

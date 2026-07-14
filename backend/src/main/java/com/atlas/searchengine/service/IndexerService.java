@@ -289,6 +289,26 @@ public class IndexerService {
                 .collect(Collectors.toList());
     }
 
+    public List<SearchResult> getLatestPublishedDocuments(String collection, int limit) {
+        List<String> targetCollections = ("all".equalsIgnoreCase(collection) || collection == null || collection.isEmpty()) 
+                ? new ArrayList<>(collections.keySet()) : List.of(collection);
+
+        List<Document> allDocs = new ArrayList<>();
+        for (String col : targetCollections) {
+            CollectionIndexData data = collections.get(col);
+            if (data != null) {
+                allDocs.addAll(data.documents().values());
+            }
+        }
+
+        return allDocs.stream()
+                .filter(doc -> doc.getPublishedAt() != null)
+                .sorted((d1, d2) -> d2.getPublishedAt().compareTo(d1.getPublishedAt()))
+                .limit(limit)
+                .map(doc -> new SearchResult(doc.getId(), doc.getSourceUrl(), doc.getTitle(), "", 0.0, doc.getCollection()))
+                .collect(Collectors.toList());
+    }
+
     public long getCollectionSize(String collection) {
         CollectionIndexData data = collections.get(collection);
         return data == null ? 0 : data.documents().size();

@@ -38,7 +38,8 @@ public class DocumentWriterService {
                             req.text(),
                             req.collection(),
                             req.sourceUrl(),
-                            req.crawledAt()
+                            req.crawledAt(),
+                            req.publishedAt()
                     );
                     
                     documentRepository.save(doc);

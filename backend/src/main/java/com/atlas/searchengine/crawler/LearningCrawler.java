@@ -54,6 +54,27 @@ public class LearningCrawler {
                 String title = jsoupDoc.title();
                 String text = jsoupDoc.body().text();
 
+                LocalDateTime publishedAt = LocalDateTime.now(); // default to now
+                try {
+                    Element metaPublishedTime = jsoupDoc.selectFirst("meta[property=article:published_time], meta[name=pubdate], meta[name=publishdate]");
+                    if (metaPublishedTime != null && metaPublishedTime.hasAttr("content")) {
+                        String content = metaPublishedTime.attr("content");
+                        if (content.length() >= 19) {
+                            publishedAt = LocalDateTime.parse(content.substring(0, 19));
+                        }
+                    } else {
+                        Element timeEl = jsoupDoc.selectFirst("time[datetime]");
+                        if (timeEl != null) {
+                            String datetime = timeEl.attr("datetime");
+                            if (datetime.length() >= 19) {
+                                publishedAt = LocalDateTime.parse(datetime.substring(0, 19));
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Could not parse date for " + url + ": " + e.getMessage());
+                }
+
                 if (!text.isEmpty()) {
                     DocumentWriteRequest req = new DocumentWriteRequest(
                             Base64.getUrlEncoder().withoutPadding().encodeToString(url.getBytes()),
@@ -61,7 +82,8 @@ public class LearningCrawler {
                             text,
                             "learning",
                             url,
-                            LocalDateTime.now()
+                            LocalDateTime.now(),
+                            publishedAt
                     );
                     documentWriteQueue.enqueue(req);
                     count++;
