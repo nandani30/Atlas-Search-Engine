@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Atom_icon_black.svg" width="80" alt="Atlas Logo"/>
   <h1>Atlas Search Engine</h1>
   <p><strong>Everything worth knowing, in one search.</strong></p>
   <a href="https://atlas-search-engine-lime.vercel.app/"><strong>🔗 Visit Live Demo (Vercel)</strong></a>
