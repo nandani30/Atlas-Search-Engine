@@ -34,6 +34,14 @@ public class LearningCrawler {
 
         while (!queue.isEmpty() && count < batchSize) {
             String url = queue.poll();
+            if (url == null) continue;
+            
+            // Clean URL: Remove hash fragments and query parameters
+            int hashIndex = url.indexOf('#');
+            if (hashIndex != -1) url = url.substring(0, hashIndex);
+            int queryIndex = url.indexOf('?');
+            if (queryIndex != -1) url = url.substring(0, queryIndex);
+            
             if (visited.contains(url)) continue;
             visited.add(url);
 
