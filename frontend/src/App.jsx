@@ -192,8 +192,8 @@ function App() {
             <div className="landing-title">Try searching</div>
             <div className="landing-pills">
               {examples.map((ex, idx) => (
-                <button key={`ex-${idx}`} className="suggestion-pill" onClick={() => handleSearch(ex)}>
-                  {ex}
+                <button key={`ex-${idx}`} className="suggestion-pill" onClick={() => handleSearch(ex.title)}>
+                  {ex.title}
                 </button>
               ))}
             </div>
