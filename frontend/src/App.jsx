@@ -1,29 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
+import { IconSearch } from '@tabler/icons-react';
 import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-
-const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon">
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-);
-
-const FlameIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="trending-icon">
-    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-  </svg>
-);
 
 function App() {
   const [query, setQuery] = useState('');
   const [collection, setCollection] = useState('all');
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   
   const [examples, setExamples] = useState([]);
-  const [trending, setTrending] = useState([]);
   const [results, setResults] = useState(null);
   const [didYouMean, setDidYouMean] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
@@ -35,17 +23,13 @@ function App() {
   
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     if (!results) {
       fetch(`${API_BASE}/random-suggestions?collection=${collection}&count=5`)
         .then(res => res.json())
         .then(data => setExamples(data))
-        .catch(err => console.error(err));
-
-      fetch(`${API_BASE}/trending?collection=${collection}&limit=10`)
-        .then(res => res.json())
-        .then(data => setTrending(data))
         .catch(err => console.error(err));
     }
   }, [collection, results]);
@@ -54,6 +38,7 @@ function App() {
     const val = e.target.value;
     setQuery(val);
     setShowAutocomplete(true);
+    setSelectedIndex(-1);
     
     if (val.trim() === '') {
       setAutocompleteSuggestions([]);
@@ -70,11 +55,38 @@ function App() {
     }, 200);
   };
 
+  const handleKeyDown = (e) => {
+    if (!showAutocomplete || autocompleteSuggestions.length === 0) {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => 
+        prev < autocompleteSuggestions.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev > -1 ? prev - 1 : -1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0) {
+        handleSearch(autocompleteSuggestions[selectedIndex]);
+      } else {
+        handleSearch();
+      }
+    }
+  };
+
   const handleSearch = (searchQuery = query, targetPage = 0) => {
     if (!searchQuery.trim()) return;
     setQuery(searchQuery);
     setPage(targetPage);
     setShowAutocomplete(false);
+    setSelectedIndex(-1);
     setLoading(true);
     
     if (targetPage === 0 && searchQuery !== query) {
@@ -109,23 +121,31 @@ function App() {
 
   const renderAutocompleteItem = (s, idx) => {
     const matchIndex = s.toLowerCase().indexOf(query.toLowerCase());
+    const isSelected = idx === selectedIndex;
+    
+    let content;
     if (matchIndex >= 0) {
       const before = s.substring(0, matchIndex);
       const match = s.substring(matchIndex, matchIndex + query.length);
       const after = s.substring(matchIndex + query.length);
-      return (
-        <div key={idx} className="autocomplete-item" onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}>
-          <SearchIcon />
-          <span>
-            {before}<span className="bold-prefix">{match}</span>{after}
-          </span>
-        </div>
+      content = (
+        <span>
+          {before}<span className="bold-prefix">{match}</span>{after}
+        </span>
       );
+    } else {
+      content = <span>{s}</span>;
     }
+
     return (
-      <div key={idx} className="autocomplete-item" onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}>
-        <SearchIcon />
-        <span>{s}</span>
+      <div 
+        key={idx} 
+        className={`autocomplete-item ${isSelected ? 'selected' : ''}`}
+        onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}
+        onMouseEnter={() => setSelectedIndex(idx)}
+      >
+        <IconSearch size={18} className="search-icon" />
+        {content}
       </div>
     );
   };
@@ -134,7 +154,7 @@ function App() {
     <div className="container">
       <header className={`header ${results ? 'header-top' : ''}`}>
         <div className="logo-container" onClick={() => {setResults(null); setQuery('');}}>
-          <div className="logo-square"></div>
+          <h1 className="logo-text" style={{ fontSize: results ? '2rem' : '3.5rem', fontWeight: 700, color: 'var(--primary-color)', margin: 0, letterSpacing: '-1px' }}>Atlas</h1>
         </div>
         
         {!results && (
@@ -145,13 +165,15 @@ function App() {
 
         <div className="search-container">
           <div className="search-bar">
-            <SearchIcon />
+            <IconSearch size={22} className="search-icon" />
             <input 
+              ref={searchInputRef}
               type="text" 
               value={query} 
               onChange={handleQueryChange}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={handleKeyDown}
               className="search-input"
+              placeholder="Search..."
               onFocus={() => setShowAutocomplete(true)}
               onBlur={() => setShowAutocomplete(false)}
             />
@@ -197,20 +219,6 @@ function App() {
                 </button>
               ))}
             </div>
-            
-            {trending.length > 0 && (
-              <div style={{ marginTop: '2.5rem' }}>
-                <div className="landing-title">Trending searches</div>
-                <div className="landing-pills">
-                  {trending.map((trend, idx) => (
-                    <button key={`tr-${idx}`} className="suggestion-pill" onClick={() => handleSearch(trend)}>
-                      <FlameIcon />
-                      {trend}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
