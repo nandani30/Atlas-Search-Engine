@@ -3,6 +3,19 @@ import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
+const SearchIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
+
+const FlameIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="trending-icon">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+  </svg>
+);
+
 function App() {
   const [query, setQuery] = useState('');
   const [collection, setCollection] = useState('all');
@@ -11,11 +24,10 @@ function App() {
   
   const [examples, setExamples] = useState([]);
   const [trending, setTrending] = useState([]);
-  const [results, setResults] = useState(null); // null means haven't searched yet
+  const [results, setResults] = useState(null);
   const [didYouMean, setDidYouMean] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
   
-  // Pagination
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
@@ -37,6 +49,7 @@ function App() {
         .catch(err => console.error(err));
     }
   }, [collection, results]);
+
   const handleQueryChange = (e) => {
     const val = e.target.value;
     setQuery(val);
@@ -64,7 +77,6 @@ function App() {
     setShowAutocomplete(false);
     setLoading(true);
     
-    // Only clear results if it's a completely new search to avoid flashing
     if (targetPage === 0 && searchQuery !== query) {
         setResults(null);
     }
@@ -89,61 +101,118 @@ function App() {
       })
       .catch(err => {
         console.error("Search error:", err);
-        setSearchMessage("Error occurred while searching. Please check console or API connection.");
-        setResults([]); // Set to empty array so the error UI actually renders
+        setSearchMessage("Error occurred while searching.");
+        setResults([]);
       })
       .finally(() => setLoading(false));
+  };
+
+  const renderAutocompleteItem = (s, idx) => {
+    const matchIndex = s.toLowerCase().indexOf(query.toLowerCase());
+    if (matchIndex >= 0) {
+      const before = s.substring(0, matchIndex);
+      const match = s.substring(matchIndex, matchIndex + query.length);
+      const after = s.substring(matchIndex + query.length);
+      return (
+        <div key={idx} className="autocomplete-item" onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}>
+          <SearchIcon />
+          <span>
+            {before}<span className="bold-prefix">{match}</span>{after}
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div key={idx} className="autocomplete-item" onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}>
+        <SearchIcon />
+        <span>{s}</span>
+      </div>
+    );
   };
 
   return (
     <div className="container">
       <header className={`header ${results ? 'header-top' : ''}`}>
-        <h1 className="logo" onClick={() => {setResults(null); setQuery('');}}>Atlas</h1>
+        <div className="logo-container" onClick={() => {setResults(null); setQuery('');}}>
+          <div className="logo-square"></div>
+        </div>
+        
+        {!results && (
+          <div className="header-subtitle">
+            Search learning, science, and news
+          </div>
+        )}
+
         <div className="search-container">
           <div className="search-bar">
-            <select 
-              value={collection} 
-              onChange={e => setCollection(e.target.value)}
-              className="collection-select"
-            >
-              <option value="all">All</option>
-              <option value="learning">Learning</option>
-              <option value="science">Science</option>
-              <option value="news">News</option>
-            </select>
+            <SearchIcon />
             <input 
               type="text" 
               value={query} 
               onChange={handleQueryChange}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              placeholder="Search the world's knowledge..."
               className="search-input"
               onFocus={() => setShowAutocomplete(true)}
-              onBlur={() => setTimeout(() => setShowAutocomplete(false), 200)}
+              onBlur={() => setShowAutocomplete(false)}
             />
-            <button onClick={() => handleSearch()} className="search-button">
-              Search
-            </button>
           </div>
           
           {showAutocomplete && autocompleteSuggestions.length > 0 && (
             <div className="autocomplete-dropdown">
-              {autocompleteSuggestions.map((s, idx) => (
-                <div 
-                  key={idx} 
-                  className="autocomplete-item"
-                  onClick={() => handleSearch(s)}
-                >
-                  {s}
-                </div>
-              ))}
+              {autocompleteSuggestions.map((s, idx) => renderAutocompleteItem(s, idx))}
             </div>
           )}
         </div>
+
+        {results && (
+          <div className="collection-filters">
+            {['all', 'learning', 'science', 'news'].map(col => (
+              <button 
+                key={col}
+                className={`filter-pill ${collection === col ? 'active' : ''}`}
+                onClick={() => {
+                  setCollection(col);
+                  if (query) {
+                    setTimeout(() => handleSearch(query, 0), 0);
+                  }
+                }}
+              >
+                {col.charAt(0).toUpperCase() + col.slice(1)}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       <main className="main-content">
         {loading && <div className="loading">Searching...</div>}
+
+        {!results && !loading && (
+          <div className="landing-section">
+            <div className="landing-title">Try searching</div>
+            <div className="landing-pills">
+              {examples.map((ex, idx) => (
+                <button key={`ex-${idx}`} className="suggestion-pill" onClick={() => handleSearch(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+            
+            {trending.length > 0 && (
+              <div style={{ marginTop: '2.5rem' }}>
+                <div className="landing-title">Trending searches</div>
+                <div className="landing-pills">
+                  {trending.map((trend, idx) => (
+                    <button key={`tr-${idx}`} className="suggestion-pill" onClick={() => handleSearch(trend)}>
+                      <FlameIcon />
+                      {trend}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {results && results.length > 0 && !loading && (
           <div className="results-container">
@@ -151,13 +220,15 @@ function App() {
             <div className="results-list">
               {results.map(r => (
                 <div key={r.id + r.title} className="result-item">
-                  <div className="result-header">
-                    <a href={r.url} className="result-title-link">
-                      <h3 className="result-title">{r.title}</h3>
-                    </a>
-                    <span className={`badge badge-${r.sourceCollection}`}>{r.sourceCollection}</span>
-                    <span className="result-score">Score: {r.score.toFixed(2)}</span>
+                  <div className="result-meta">
+                    <span className={`badge badge-${r.sourceCollection}`}>
+                      {r.sourceCollection.charAt(0).toUpperCase() + r.sourceCollection.slice(1)}
+                    </span>
+                    <span className="result-url">{new URL(r.url).hostname}</span>
                   </div>
+                  <a href={r.url} className="result-title-link">
+                    <h3 className="result-title">{r.title}</h3>
+                  </a>
                   <p className="result-snippet">{r.snippet}</p>
                 </div>
               ))}
@@ -172,7 +243,10 @@ function App() {
                 >
                   Previous
                 </button>
-                <span className="page-info">Page {page + 1} of {totalPages}</span>
+                <div className="page-info">
+                  <span>Page {page + 1} of</span>
+                  <span>{totalPages}</span>
+                </div>
                 <button 
                   className="page-btn" 
                   disabled={page >= totalPages - 1}
