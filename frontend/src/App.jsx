@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { IconSearch, IconFlame } from '@tabler/icons-react';
+import { IconSearch, IconAtom, IconBooks, IconFlask, IconNews } from '@tabler/icons-react';
 import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -12,7 +12,6 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   
   const [examples, setExamples] = useState([]);
-  const [trending, setTrending] = useState([]);
   const [results, setResults] = useState(null);
   const [didYouMean, setDidYouMean] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
@@ -31,11 +30,6 @@ function App() {
       fetch(`${API_BASE}/random-suggestions?collection=${collection}&count=5`)
         .then(res => res.json())
         .then(data => setExamples(data))
-        .catch(err => console.error(err));
-
-      fetch(`${API_BASE}/trending?collection=${collection}&limit=10`)
-        .then(res => res.json())
-        .then(data => setTrending(data))
         .catch(err => console.error(err));
     }
   }, [collection, results]);
@@ -150,7 +144,7 @@ function App() {
         onMouseDown={(e) => { e.preventDefault(); handleSearch(s); }}
         onMouseEnter={() => setSelectedIndex(idx)}
       >
-        <IconSearch size={18} className="search-icon" />
+        <IconSearch size={14} className="autocomplete-item-icon" />
         {content}
       </div>
     );
@@ -158,66 +152,82 @@ function App() {
 
   return (
     <div className="container">
-      <header className={`header ${results ? 'header-top' : ''}`}>
-        <div className="logo-container" onClick={() => {setResults(null); setQuery('');}}>
-          <div className="logo-square"></div>
+      {!results && (
+        <div className="landing-header">
+          <IconAtom size={36} className="logo-icon" style={{ marginBottom: '8px' }} />
+          <span className="logo-text">Atlas</span>
+          <span className="header-subtitle">Everything worth knowing, in one search.</span>
+        </div>
+      )}
+
+      {results && (
+        <div className="results-header" onClick={() => {setResults(null); setQuery('');}}>
+          <IconAtom size={22} className="logo-icon" />
+          <span className="logo-text">Atlas</span>
+        </div>
+      )}
+
+      <div className={`search-container ${results ? 'results-search-container' : ''}`}>
+        <div className="search-bar">
+          <input 
+            ref={searchInputRef}
+            type="text" 
+            value={query} 
+            onChange={handleQueryChange}
+            onKeyDown={handleKeyDown}
+            className="search-input"
+            placeholder="Search learning, science, or news"
+            onFocus={() => setShowAutocomplete(true)}
+            onBlur={() => setShowAutocomplete(false)}
+          />
+          <IconSearch size={16} className="search-icon" />
         </div>
         
-        {!results && (
-          <div className="header-subtitle">
-            Search learning, science, and news
+        {showAutocomplete && autocompleteSuggestions.length > 0 && (
+          <div className="autocomplete-dropdown">
+            {autocompleteSuggestions.map((s, idx) => renderAutocompleteItem(s, idx))}
           </div>
         )}
+      </div>
 
-        <div className="search-container">
-          <div className="search-bar">
-            <IconSearch size={22} className="search-icon" />
-            <input 
-              ref={searchInputRef}
-              type="text" 
-              value={query} 
-              onChange={handleQueryChange}
-              onKeyDown={handleKeyDown}
-              className="search-input"
-              placeholder=""
-              onFocus={() => setShowAutocomplete(true)}
-              onBlur={() => setShowAutocomplete(false)}
-            />
-          </div>
-          
-          {showAutocomplete && autocompleteSuggestions.length > 0 && (
-            <div className="autocomplete-dropdown">
-              {autocompleteSuggestions.map((s, idx) => renderAutocompleteItem(s, idx))}
-            </div>
-          )}
+      {results && (
+        <div className="collection-filters">
+          <button 
+            className={`filter-pill ${collection === 'all' ? 'active' : ''}`}
+            onClick={() => { setCollection('all'); setTimeout(() => handleSearch(query, 0), 0); }}
+          >
+            All
+          </button>
+          <button 
+            className={`filter-pill ${collection === 'learning' ? 'active' : ''}`}
+            onClick={() => { setCollection('learning'); setTimeout(() => handleSearch(query, 0), 0); }}
+          >
+            <IconBooks size={14} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
+            Learning
+          </button>
+          <button 
+            className={`filter-pill ${collection === 'science' ? 'active' : ''}`}
+            onClick={() => { setCollection('science'); setTimeout(() => handleSearch(query, 0), 0); }}
+          >
+            <IconFlask size={14} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
+            Science
+          </button>
+          <button 
+            className={`filter-pill ${collection === 'news' ? 'active' : ''}`}
+            onClick={() => { setCollection('news'); setTimeout(() => handleSearch(query, 0), 0); }}
+          >
+            <IconNews size={14} style={{ marginRight: '4px', verticalAlign: '-2px' }} />
+            News
+          </button>
         </div>
+      )}
 
-        {results && (
-          <div className="collection-filters">
-            {['all', 'learning', 'science', 'news'].map(col => (
-              <button 
-                key={col}
-                className={`filter-pill ${collection === col ? 'active' : ''}`}
-                onClick={() => {
-                  setCollection(col);
-                  if (query) {
-                    setTimeout(() => handleSearch(query, 0), 0);
-                  }
-                }}
-              >
-                {col.charAt(0).toUpperCase() + col.slice(1)}
-              </button>
-            ))}
-          </div>
-        )}
-      </header>
-
-      <main className="main-content">
+      <main>
         {loading && <div className="loading">Searching...</div>}
 
         {!results && !loading && (
           <div className="landing-section">
-            <div className="landing-title">Try searching</div>
+            <p className="landing-title">Try searching</p>
             <div className="landing-pills">
               {examples.map((ex, idx) => (
                 <button key={`ex-${idx}`} className="suggestion-pill" onClick={() => handleSearch(ex.title)}>
@@ -225,26 +235,12 @@ function App() {
                 </button>
               ))}
             </div>
-
-            {trending && trending.length > 0 && (
-              <div className="trending-section">
-                <div className="landing-title" style={{ marginTop: '2.5rem' }}>Trending searches</div>
-                <div className="landing-pills">
-                  {trending.map((trend, idx) => (
-                    <button key={`tr-${idx}`} className="suggestion-pill trending-pill" onClick={() => handleSearch(trend)}>
-                      <IconFlame size={16} className="trending-icon" />
-                      {trend}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
         {results && results.length > 0 && !loading && (
-          <div className="results-container">
-            <p className="results-count">About {totalResults} results</p>
+          <div>
+            <div className="results-count">About {totalResults} results</div>
             <div className="results-list">
               {results.map(r => (
                 <div key={r.id + r.title} className="result-item">
@@ -271,10 +267,9 @@ function App() {
                 >
                   Previous
                 </button>
-                <div className="page-info">
-                  <span>Page {page + 1} of</span>
-                  <span>{totalPages}</span>
-                </div>
+                <span className="page-info">
+                  Page {page + 1} of {totalPages}
+                </span>
                 <button 
                   className="page-btn" 
                   disabled={page >= totalPages - 1}
