@@ -137,6 +137,30 @@ public class IndexerService {
             targetCollections = List.of(collection);
         }
 
+        // --- GLOBAL STATISTICS CALCULATION ---
+        int globalTotalDocs = 0;
+        long totalLength = 0;
+        Map<String, Integer> globalDocCountWithTerm = new HashMap<>();
+
+        for (String col : targetCollections) {
+            CollectionIndexData data = collections.get(col);
+            if (data == null) continue;
+            
+            globalTotalDocs += data.documentLengths().size();
+            for (int len : data.documentLengths().values()) {
+                totalLength += len;
+            }
+            
+            for (String token : queryTokens) {
+                Map<String, Integer> docsWithTerm = data.invertedIndex().get(token);
+                if (docsWithTerm != null) {
+                    globalDocCountWithTerm.put(token, globalDocCountWithTerm.getOrDefault(token, 0) + docsWithTerm.size());
+                }
+            }
+        }
+
+        double globalAvgDocLength = globalTotalDocs == 0 ? 1.0 : (double) totalLength / globalTotalDocs;
+
         Map<String, Double> docScores = new HashMap<>();
         Map<String, Document> matchedDocs = new HashMap<>();
 
@@ -144,21 +168,18 @@ public class IndexerService {
             CollectionIndexData data = collections.get(col);
             if (data == null) continue;
 
-            int totalDocs = data.documentLengths().size();
-            double avgDocLength = data.documentLengths().values().stream().mapToInt(Integer::intValue).average().orElse(1.0);
-
             for (String token : queryTokens) {
                 Map<String, Integer> docsWithTerm = data.invertedIndex().get(token);
                 if (docsWithTerm == null) continue;
 
-                int docCountWithTerm = docsWithTerm.size();
+                int docCountWithTerm = globalDocCountWithTerm.getOrDefault(token, 0);
 
                 for (Map.Entry<String, Integer> entry : docsWithTerm.entrySet()) {
                     String docId = entry.getKey();
                     int tf = entry.getValue();
                     int docLength = data.documentLengths().getOrDefault(docId, 1);
 
-                    double score = bm25Ranker.scoreTerm(tf, docLength, avgDocLength, docCountWithTerm, totalDocs);
+                    double score = bm25Ranker.scoreTerm(tf, docLength, globalAvgDocLength, docCountWithTerm, globalTotalDocs);
                     
                     String globalDocId = col + ":" + docId;
                     docScores.put(globalDocId, docScores.getOrDefault(globalDocId, 0.0) + score);
