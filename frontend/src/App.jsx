@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { IconSearch } from '@tabler/icons-react';
+import { IconSearch, IconFlame } from '@tabler/icons-react';
 import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -12,6 +12,7 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   
   const [examples, setExamples] = useState([]);
+  const [trending, setTrending] = useState([]);
   const [results, setResults] = useState(null);
   const [didYouMean, setDidYouMean] = useState([]);
   const [searchMessage, setSearchMessage] = useState('');
@@ -30,6 +31,11 @@ function App() {
       fetch(`${API_BASE}/random-suggestions?collection=${collection}&count=5`)
         .then(res => res.json())
         .then(data => setExamples(data))
+        .catch(err => console.error(err));
+
+      fetch(`${API_BASE}/trending?collection=${collection}&limit=10`)
+        .then(res => res.json())
+        .then(data => setTrending(data))
         .catch(err => console.error(err));
     }
   }, [collection, results]);
@@ -154,7 +160,7 @@ function App() {
     <div className="container">
       <header className={`header ${results ? 'header-top' : ''}`}>
         <div className="logo-container" onClick={() => {setResults(null); setQuery('');}}>
-          <h1 className="logo-text" style={{ fontSize: results ? '2rem' : '3.5rem', fontWeight: 700, color: 'var(--primary-color)', margin: 0, letterSpacing: '-1px' }}>Atlas</h1>
+          <div className="logo-square"></div>
         </div>
         
         {!results && (
@@ -173,7 +179,7 @@ function App() {
               onChange={handleQueryChange}
               onKeyDown={handleKeyDown}
               className="search-input"
-              placeholder="Search..."
+              placeholder=""
               onFocus={() => setShowAutocomplete(true)}
               onBlur={() => setShowAutocomplete(false)}
             />
@@ -219,6 +225,20 @@ function App() {
                 </button>
               ))}
             </div>
+
+            {trending && trending.length > 0 && (
+              <div className="trending-section">
+                <div className="landing-title" style={{ marginTop: '2.5rem' }}>Trending searches</div>
+                <div className="landing-pills">
+                  {trending.map((trend, idx) => (
+                    <button key={`tr-${idx}`} className="suggestion-pill trending-pill" onClick={() => handleSearch(trend)}>
+                      <IconFlame size={16} className="trending-icon" />
+                      {trend}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

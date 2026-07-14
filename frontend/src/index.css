@@ -1,20 +1,20 @@
 :root {
-  --bg-color: #ffffff;
-  --text-color: #333333;
-  --text-secondary: #9ca3af;
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --text-secondary: #a0a0a0;
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
-  --border-color: #e5e7eb;
-  --card-bg: #ffffff;
+  --border-color: #333333;
+  --card-bg: #1e1e1e;
   
   --learning-color: #1e3a8a;
   --news-color: #451a03;
   --science-color: #1e1b4b;
-  --science-text: #ffffff;
+  --science-text: #e0e0e0;
   
   --search-bg: #2d2d2d;
   --search-text: #ffffff;
-  --search-icon: #9ca3af;
+  --search-icon: #a0a0a0;
   --search-border: #404040;
 }
 
