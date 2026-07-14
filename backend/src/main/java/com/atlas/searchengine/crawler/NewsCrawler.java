@@ -50,7 +50,7 @@ public class NewsCrawler {
 
                 if (!text.isEmpty()) {
                     DocumentWriteRequest req = new DocumentWriteRequest(
-                            UUID.randomUUID().toString(),
+                            Base64.getUrlEncoder().withoutPadding().encodeToString(url.getBytes()),
                             title,
                             text,
                             "news",

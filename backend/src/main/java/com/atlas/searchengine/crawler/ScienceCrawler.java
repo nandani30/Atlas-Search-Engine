@@ -56,7 +56,7 @@ public class ScienceCrawler {
 
                     if (!text.isEmpty()) {
                         DocumentWriteRequest req = new DocumentWriteRequest(
-                                UUID.randomUUID().toString(),
+                                Base64.getUrlEncoder().withoutPadding().encodeToString(url.getBytes()),
                                 title,
                                 text,
                                 "science",
