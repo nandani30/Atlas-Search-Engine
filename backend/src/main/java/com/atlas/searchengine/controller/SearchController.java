@@ -70,4 +70,9 @@ public class SearchController {
         List<SearchResult> results = indexerService.getRandomSuggestions(collection, count);
         return ResponseEntity.ok(results);
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("ok");
+    }
 }
