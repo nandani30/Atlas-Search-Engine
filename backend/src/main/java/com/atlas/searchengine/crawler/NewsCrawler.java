@@ -39,9 +39,10 @@ public class NewsCrawler {
             visited.add(url);
 
             try {
-                Thread.sleep(1500); // 1.5s delay
+                Thread.sleep(3000); // 3s delay to avoid 429
                 org.jsoup.nodes.Document jsoupDoc = Jsoup.connect(url)
-                        .userAgent("AtlasSearchBot/1.0 (+http://localhost:5173)")
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                        .header("Accept-Language", "en-US,en;q=0.9")
                         .get();
 
                 String title = jsoupDoc.title();
