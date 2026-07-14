@@ -21,7 +21,10 @@ public class ScienceCrawler {
     private static final List<String> SEED_URLS = Arrays.asList(
             "https://www.nasa.gov/",
             "https://home.cern/",
-            "https://www.esa.int/"
+            "https://www.esa.int/",
+            "https://www.nature.com/",
+            "https://www.sciencedaily.com/",
+            "https://www.newscientist.com/"
     );
 
     public ScienceCrawler(DocumentWriteQueue documentWriteQueue) {
@@ -103,7 +106,16 @@ public class ScienceCrawler {
                     for (Element link : links) {
                         if (addedLinks >= 5) break;
                         String nextUrl = link.absUrl("href");
-                        if (nextUrl.startsWith("https://www.nasa.gov/") || nextUrl.startsWith("https://home.cern/") || nextUrl.startsWith("https://www.esa.int/")) {
+                        
+                        boolean isAllowed = false;
+                        for (String seed : SEED_URLS) {
+                            if (nextUrl.startsWith(seed)) {
+                                isAllowed = true;
+                                break;
+                            }
+                        }
+                        
+                        if (isAllowed) {
                             if (!visited.contains(nextUrl) && !queue.contains(nextUrl)) {
                                 queue.add(nextUrl);
                                 addedLinks++;

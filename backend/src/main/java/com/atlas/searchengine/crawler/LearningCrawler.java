@@ -19,8 +19,11 @@ public class LearningCrawler {
     private final Queue<String> queue = new LinkedList<>();
 
     private static final List<String> SEED_URLS = Arrays.asList(
-            "https://en.wikipedia.org/wiki/Main_Page",
-            "https://en.wikibooks.org/wiki/Main_Page"
+            "https://en.wikipedia.org/wiki/",
+            "https://en.wikibooks.org/wiki/",
+            "https://plato.stanford.edu/",
+            "https://www.khanacademy.org/",
+            "https://www.britannica.com/"
     );
 
     public LearningCrawler(DocumentWriteQueue documentWriteQueue) {
@@ -95,7 +98,16 @@ public class LearningCrawler {
                 for (Element link : links) {
                     if (addedLinks >= 5) break;
                     String nextUrl = link.absUrl("href");
-                    if (nextUrl.startsWith("https://en.wikipedia.org/wiki/") || nextUrl.startsWith("https://en.wikibooks.org/wiki/")) {
+                    
+                    boolean isAllowed = false;
+                    for (String seed : SEED_URLS) {
+                        if (nextUrl.startsWith(seed)) {
+                            isAllowed = true;
+                            break;
+                        }
+                    }
+                    
+                    if (isAllowed) {
                         if (!visited.contains(nextUrl) && !queue.contains(nextUrl)) {
                             queue.add(nextUrl);
                             addedLinks++;

@@ -21,7 +21,10 @@ public class NewsCrawler {
     private static final List<String> SEED_URLS = Arrays.asList(
             "https://www.bbc.com/news",
             "https://www.reuters.com/",
-            "https://apnews.com/"
+            "https://apnews.com/",
+            "https://www.thehindu.com/",
+            "https://timesofindia.indiatimes.com/",
+            "https://www.aljazeera.com/"
     );
 
     public NewsCrawler(DocumentWriteQueue documentWriteQueue) {
@@ -99,7 +102,16 @@ public class NewsCrawler {
                 for (Element link : links) {
                     if (addedLinks >= 5) break;
                     String nextUrl = link.absUrl("href");
-                    if (nextUrl.startsWith("https://www.bbc.com/news") || nextUrl.startsWith("https://www.reuters.com/") || nextUrl.startsWith("https://apnews.com/")) {
+                    
+                    boolean isAllowed = false;
+                    for (String seed : SEED_URLS) {
+                        if (nextUrl.startsWith(seed)) {
+                            isAllowed = true;
+                            break;
+                        }
+                    }
+                    
+                    if (isAllowed) {
                         if (!visited.contains(nextUrl) && !queue.contains(nextUrl)) {
                             queue.add(nextUrl);
                             addedLinks++;
