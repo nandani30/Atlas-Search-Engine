@@ -89,7 +89,8 @@ function App() {
       })
       .catch(err => {
         console.error("Search error:", err);
-        setSearchMessage("Error occurred while searching.");
+        setSearchMessage("Error occurred while searching. Please check console or API connection.");
+        setResults([]); // Set to empty array so the error UI actually renders
       })
       .finally(() => setLoading(false));
   };
