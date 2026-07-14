@@ -89,15 +89,15 @@ public class IndexerService {
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        int page = 0;
-        org.springframework.data.domain.Page<Document> docPage;
-        do {
-            docPage = repo.findByCollection(collection, org.springframework.data.domain.PageRequest.of(page, 50));
-            for (Document doc : docPage.getContent()) {
-                indexDocIntoData(doc, newData);
-            }
-            page++;
-        } while (docPage.hasNext());
+        // Limit to 50 documents per collection to prevent memory exhaustion on 512MB Render free tier
+        org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
+                collection, 
+                org.springframework.data.domain.PageRequest.of(0, 50, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
+        );
+        
+        for (Document doc : docPage.getContent()) {
+            indexDocIntoData(doc, newData);
+        }
 
         // Atomic swap
         collections.put(collection, newData);
