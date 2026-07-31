@@ -90,10 +90,10 @@ public class IndexerService {
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        // Limit to 50 documents per collection to prevent memory exhaustion on 512MB Render free tier
+        // Limit to 500 documents per collection to provide plenty of search results while respecting Render RAM
         org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
                 collection, 
-                org.springframework.data.domain.PageRequest.of(0, 50, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
+                org.springframework.data.domain.PageRequest.of(0, 500, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
         );
         
         for (Document doc : docPage.getContent()) {

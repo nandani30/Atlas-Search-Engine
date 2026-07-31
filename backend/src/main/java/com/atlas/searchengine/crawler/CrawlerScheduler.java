@@ -21,28 +21,27 @@ public class CrawlerScheduler {
         this.documentRepository = documentRepository;
     }
 
-    // Run every 1 hour (3600000 ms), but wait 60 seconds after startup
-    @Scheduled(initialDelay = 60000, fixedDelay = 3600000)
-    public void runCrawlers() {
-        System.out.println("Starting scheduled re-crawling...");
-
-        Thread t1 = new Thread(() -> {
-            learningCrawler.crawlBatch(50);
+    @Scheduled(fixedDelay = 3600000) // Every 1 hour
+    public void scheduleLearningCrawler() {
+        if (learningCrawler != null) {
+            learningCrawler.crawlBatch(100);
             indexerService.rebuildCollectionFromDB("learning", documentRepository);
-        });
+        }
+    }
 
-        Thread t2 = new Thread(() -> {
-            newsCrawler.crawlBatch(50);
+    @Scheduled(fixedDelay = 3600000)
+    public void scheduleNewsCrawler() {
+        if (newsCrawler != null) {
+            newsCrawler.crawlBatch(100);
             indexerService.rebuildCollectionFromDB("news", documentRepository);
-        });
+        }
+    }
 
-        Thread t3 = new Thread(() -> {
-            scienceCrawler.crawlBatch(50);
+    @Scheduled(fixedDelay = 3600000)
+    public void scheduleScienceCrawler() {
+        if (scienceCrawler != null) {
+            scienceCrawler.crawlBatch(100);
             indexerService.rebuildCollectionFromDB("science", documentRepository);
-        });
-
-        t1.start();
-        t2.start();
-        t3.start();
+        }
     }
 }
