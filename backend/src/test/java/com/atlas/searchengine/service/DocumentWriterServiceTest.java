@@ -60,6 +60,7 @@ public class DocumentWriterServiceTest {
                             "Text " + threadNum + "-" + j,
                             "test_collection",
                             "http://test.com/" + threadNum + "/" + j,
+                            LocalDateTime.now(),
                             LocalDateTime.now()
                     );
                     writeQueue.enqueue(req);
