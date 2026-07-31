@@ -90,14 +90,24 @@ public class IndexerService {
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        // Limit to 500 documents per collection to provide plenty of search results while respecting Render RAM
-        org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
-                collection, 
-                org.springframework.data.domain.PageRequest.of(0, 500, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
-        );
-        
-        for (Document doc : docPage.getContent()) {
-            indexDocIntoData(doc, newData);
+        // Fetch 500 documents total, but in safe batches of 50 to prevent Turso 'Resource exhausted: mem_hrana_response' limit crashes
+        int totalFetched = 0;
+        int page = 0;
+        int batchSize = 50;
+        while (totalFetched < 500) {
+            org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
+                    collection, 
+                    org.springframework.data.domain.PageRequest.of(page, batchSize, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
+            );
+            
+            if (docPage.isEmpty()) break;
+            
+            for (Document doc : docPage.getContent()) {
+                indexDocIntoData(doc, newData);
+                totalFetched++;
+                if (totalFetched >= 500) break;
+            }
+            page++;
         }
 
         // Atomic swap
