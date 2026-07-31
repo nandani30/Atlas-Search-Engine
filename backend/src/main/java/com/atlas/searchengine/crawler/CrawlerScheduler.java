@@ -48,10 +48,10 @@ public class CrawlerScheduler {
     @Scheduled(fixedDelay = 86400000) // Daily safety net
     public void cleanupDatabase() {
         long count = documentRepository.count();
-        // Turso provides 9 GB free. ~100,000 full articles = ~1 GB.
-        // This limit maximizes free tier while remaining 100% crash-proof forever.
-        if (count > 100000) {
-            int toDelete = (int) (count - 90000);
+        // Turso provides 9 GB free. ~800,000 full articles = ~8 GB.
+        // This limit absolutely maximizes the free tier up to its absolute edge safely.
+        if (count > 800000) {
+            int toDelete = (int) (count - 780000);
             documentRepository.deleteOldestDocuments(toDelete);
             System.out.println("Automated safety cleanup: Removed " + toDelete + " old documents.");
         }
