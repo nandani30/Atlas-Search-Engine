@@ -44,14 +44,4 @@ public class CrawlerScheduler {
             indexerService.rebuildCollectionFromDB("science", documentRepository);
         }
     }
-
-    @Scheduled(fixedDelay = 86400000) // Daily cleanup
-    public void cleanupDatabase() {
-        long count = documentRepository.count();
-        if (count > 2500) {
-            int toDelete = (int) (count - 2000);
-            documentRepository.deleteOldestDocuments(toDelete);
-            System.out.println("Cleaned up " + toDelete + " old documents to stay under Turso limits.");
-        }
-    }
 }
