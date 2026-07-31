@@ -48,7 +48,17 @@ public class IndexerService {
         String docId = doc.getId();
         if (docId == null || data.documents().containsKey(docId)) return;
 
-        data.documents().put(docId, doc);
+        // Strip text to save RAM for the in-memory index (only needed for snippets)
+        String strippedText = doc.getText();
+        if (strippedText != null && strippedText.length() > 1500) {
+            strippedText = strippedText.substring(0, 1500);
+        }
+
+        Document memorySafeDoc = new Document(
+            doc.getId(), doc.getTitle(), strippedText, doc.getCollection(), 
+            doc.getSourceUrl(), doc.getCrawledAt(), doc.getPublishedAt()
+        );
+        data.documents().put(docId, memorySafeDoc);
 
         List<String> titleTokens = tokenize(doc.getTitle());
         List<String> textTokens = tokenize(doc.getText());
@@ -90,11 +100,11 @@ public class IndexerService {
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        // Fetch 500 documents total, but in safe batches of 10 to prevent Turso 'Resource exhausted' and Java Heap OOM errors
+        // Fetch 3000 documents total per collection (9000 total across 3 collections), in safe batches of 20
         int totalFetched = 0;
         int page = 0;
-        int batchSize = 10;
-        while (totalFetched < 500) {
+        int batchSize = 20;
+        while (totalFetched < 3000) {
             org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
                     collection, 
                     org.springframework.data.domain.PageRequest.of(page, batchSize, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
@@ -105,7 +115,7 @@ public class IndexerService {
             for (Document doc : docPage.getContent()) {
                 indexDocIntoData(doc, newData);
                 totalFetched++;
-                if (totalFetched >= 500) break;
+                if (totalFetched >= 3000) break;
             }
             page++;
         }
