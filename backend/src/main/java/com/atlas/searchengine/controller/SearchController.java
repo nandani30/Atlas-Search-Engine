@@ -44,7 +44,7 @@ public class SearchController {
         
         // Deep Database Hybrid Search: If RAM index yields very few results, fallback to the 800,000 document Turso archive
         if (totalElements < 10) {
-            Page<Document> dbFallbackPage = documentRepository.searchDatabaseFallback(q, PageRequest.of(page, pageSize));
+            Page<Document> dbFallbackPage = documentRepository.searchDatabaseFallback("%" + q + "%", PageRequest.of(page, pageSize));
             if (dbFallbackPage.hasContent()) {
                 List<String> queryTokens = List.of(q.split(" "));
                 List<SearchResult> fallbackResults = dbFallbackPage.getContent().stream()
