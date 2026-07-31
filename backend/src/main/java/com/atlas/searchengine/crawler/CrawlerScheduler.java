@@ -21,6 +21,15 @@ public class CrawlerScheduler {
         this.documentRepository = documentRepository;
     }
 
+    @jakarta.annotation.PostConstruct
+    public void loadIndexOnStartup() {
+        System.out.println("Loading documents from database into RAM index on startup...");
+        indexerService.rebuildCollectionFromDB("learning", documentRepository);
+        indexerService.rebuildCollectionFromDB("news", documentRepository);
+        indexerService.rebuildCollectionFromDB("science", documentRepository);
+        System.out.println("Startup indexing complete. Search engine is fully operational.");
+    }
+
     @Scheduled(fixedDelay = 43200000) // Every 12 hours
     public void scheduleLearningCrawler() {
         if (learningCrawler != null) {
