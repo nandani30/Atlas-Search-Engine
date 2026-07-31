@@ -3,8 +3,12 @@ package com.atlas.searchengine.controller;
 import com.atlas.searchengine.model.PagedResult;
 import com.atlas.searchengine.model.SearchResponse;
 import com.atlas.searchengine.model.SearchResult;
+import com.atlas.searchengine.model.Document;
+import com.atlas.searchengine.model.DocumentRepository;
 import com.atlas.searchengine.service.IndexerService;
 import com.atlas.searchengine.service.SearchAnalyticsService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +21,12 @@ public class SearchController {
 
     private final IndexerService indexerService;
     private final SearchAnalyticsService searchAnalyticsService;
+    private final DocumentRepository documentRepository;
 
-    public SearchController(IndexerService indexerService, SearchAnalyticsService searchAnalyticsService) {
+    public SearchController(IndexerService indexerService, SearchAnalyticsService searchAnalyticsService, DocumentRepository documentRepository) {
         this.indexerService = indexerService;
         this.searchAnalyticsService = searchAnalyticsService;
+        this.documentRepository = documentRepository;
     }
 
     @GetMapping("/search")
@@ -34,13 +40,34 @@ public class SearchController {
         
         PagedResult<SearchResult> pagedResult = indexerService.search(q, collection, page, pageSize);
         List<SearchResult> results = pagedResult.content();
+        long totalElements = pagedResult.totalElements();
+        
+        // Deep Database Hybrid Search: If RAM index yields very few results, fallback to the 800,000 document Turso archive
+        if (totalElements < 10) {
+            Page<Document> dbFallbackPage = documentRepository.searchDatabaseFallback(q, PageRequest.of(page, pageSize));
+            if (dbFallbackPage.hasContent()) {
+                List<String> queryTokens = List.of(q.split(" "));
+                List<SearchResult> fallbackResults = dbFallbackPage.getContent().stream()
+                        .map(doc -> new SearchResult(
+                                doc.getId(), 
+                                doc.getSourceUrl(), 
+                                doc.getTitle(), 
+                                indexerService.generateSnippet(doc.getText(), queryTokens), 
+                                0.1, // Fixed low score for fallback results
+                                doc.getCollection()
+                        )).toList();
+                
+                // Return fallback results directly
+                return ResponseEntity.ok(new SearchResponse(fallbackResults, Collections.emptyList(), "Deep Database Fallback", dbFallbackPage.getTotalElements(), dbFallbackPage.getTotalPages()));
+            }
+        }
         
         if (results.isEmpty()) {
             List<String> didYouMean = indexerService.getDidYouMean(q, collection);
             return ResponseEntity.ok(new SearchResponse(Collections.emptyList(), didYouMean, "no results", 0, 0));
         }
         
-        return ResponseEntity.ok(new SearchResponse(results, Collections.emptyList(), "success", pagedResult.totalElements(), pagedResult.totalPages()));
+        return ResponseEntity.ok(new SearchResponse(results, Collections.emptyList(), "success", totalElements, pagedResult.totalPages()));
     }
 
     @GetMapping("/trending")

@@ -228,7 +228,7 @@ public class IndexerService {
         return new PagedResult<>(pagedResults, totalElements, totalPages);
     }
 
-    private String generateSnippet(String text, List<String> queryTokens) {
+    public String generateSnippet(String text, List<String> queryTokens) {
         if (text == null || text.isEmpty()) return "";
         
         String lowerText = text.toLowerCase();
