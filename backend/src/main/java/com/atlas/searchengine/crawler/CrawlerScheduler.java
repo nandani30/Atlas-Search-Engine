@@ -21,26 +21,26 @@ public class CrawlerScheduler {
         this.documentRepository = documentRepository;
     }
 
-    @Scheduled(fixedDelay = 3600000) // Every 1 hour
+    @Scheduled(fixedDelay = 43200000) // Every 12 hours
     public void scheduleLearningCrawler() {
         if (learningCrawler != null) {
-            learningCrawler.crawlBatch(100);
+            learningCrawler.crawlBatch(20);
             indexerService.rebuildCollectionFromDB("learning", documentRepository);
         }
     }
 
-    @Scheduled(fixedDelay = 3600000)
+    @Scheduled(fixedDelay = 43200000)
     public void scheduleNewsCrawler() {
         if (newsCrawler != null) {
-            newsCrawler.crawlBatch(100);
+            newsCrawler.crawlBatch(20);
             indexerService.rebuildCollectionFromDB("news", documentRepository);
         }
     }
 
-    @Scheduled(fixedDelay = 3600000)
+    @Scheduled(fixedDelay = 43200000)
     public void scheduleScienceCrawler() {
         if (scienceCrawler != null) {
-            scienceCrawler.crawlBatch(100);
+            scienceCrawler.crawlBatch(20);
             indexerService.rebuildCollectionFromDB("science", documentRepository);
         }
     }
