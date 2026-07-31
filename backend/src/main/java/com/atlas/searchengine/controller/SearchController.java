@@ -43,7 +43,8 @@ public class SearchController {
         long totalElements = pagedResult.totalElements();
         
         // Deep Database Hybrid Search: If RAM index yields very few results, fallback to the 800,000 document Turso archive
-        if (totalElements < 10) {
+        // We only trigger this for queries 3 characters or longer to prevent massive slow full-table scans for 'a' or '.'
+        if (totalElements < 10 && q.trim().length() >= 3) {
             Page<Document> dbFallbackPage = documentRepository.searchDatabaseFallback("%" + q + "%", PageRequest.of(page, pageSize));
             if (dbFallbackPage.hasContent()) {
                 List<String> queryTokens = List.of(q.split(" "));
