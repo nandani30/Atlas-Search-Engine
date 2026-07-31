@@ -90,10 +90,10 @@ public class IndexerService {
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        // Fetch 500 documents total, but in safe batches of 50 to prevent Turso 'Resource exhausted: mem_hrana_response' limit crashes
+        // Fetch 500 documents total, but in safe batches of 10 to prevent Turso 'Resource exhausted' and Java Heap OOM errors
         int totalFetched = 0;
         int page = 0;
-        int batchSize = 50;
+        int batchSize = 10;
         while (totalFetched < 500) {
             org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
                     collection, 
