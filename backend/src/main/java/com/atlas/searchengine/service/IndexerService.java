@@ -100,11 +100,11 @@ public class IndexerService {
                 new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new AutocompleteTrie()
         );
 
-        // Fetch 1000 documents total per collection (3000 total across 3 collections), in safe batches of 20
+        // Fetch 500 documents total per collection (1500 total across 3 collections), in safe batches of 20
         int totalFetched = 0;
         int page = 0;
         int batchSize = 20;
-        while (totalFetched < 1000) {
+        while (totalFetched < 500) {
             org.springframework.data.domain.Page<Document> docPage = repo.findByCollection(
                     collection, 
                     org.springframework.data.domain.PageRequest.of(page, batchSize, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "crawledAt"))
@@ -115,7 +115,7 @@ public class IndexerService {
             for (Document doc : docPage.getContent()) {
                 indexDocIntoData(doc, newData);
                 totalFetched++;
-                if (totalFetched >= 1000) break;
+                if (totalFetched >= 500) break;
             }
             page++;
         }
