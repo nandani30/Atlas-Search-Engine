@@ -11,12 +11,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${ALLOWED_FRONTEND_ORIGIN:http://localhost:5173}")
     private String allowedOrigin;
 
-    @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(allowedOrigin)
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowedHeaders("*");
     }
 }
